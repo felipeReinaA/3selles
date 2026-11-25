@@ -56,8 +56,9 @@ nav a{text-decoration:none;color:var(--m);transition:all .3s ease}nav a:hover{co
 .cards{display:grid;gap:20px;grid-template-columns:1fr}
 .card{background:#fff;border:1px solid var(--l);border-radius:14px;padding:22px;display:flex;flex-direction:column;box-shadow:0 10px 25px -5px rgba(0,0,0,.05);transition:all .3s ease}
 .card:hover{transform:translateY(-4px);box-shadow:0 18px 32px -8px rgba(27,59,43,.18)}
-.thumb{height:120px;border-radius:10px;background:var(--bg);display:grid;place-items:center;color:#8d96a0;margin-bottom:14px}
+.thumb{aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--bg);display:grid;place-items:center;color:#8d96a0;margin-bottom:14px}
 .thumb svg{height:96px;width:auto;transition:color .3s ease}
+.thumb img{width:100%;height:100%;object-fit:contain;display:block}
 .card p{font-size:.9rem;color:var(--m);margin:6px 0 10px}
 .card ul{list-style:none;font-size:.85rem;display:grid;gap:4px;margin-bottom:14px}
 .card li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--l);padding-bottom:4px}
@@ -293,10 +294,11 @@ document.querySelectorAll("[data-wa]").forEach(function(a){
 a.href=wa(a.getAttribute("data-wa")||"Hola, quiero cotizar bolsas para café");a.target="_blank";a.rel="noopener noreferrer";
 });
 var C={Blanca:["#FFFFFF","#8d96a0"],Dorada:["linear-gradient(135deg,#E8CB7C,#B88A2A)","#B88A2A"],Negra:["#151515","#151515"],Azul:["#1F4E9C","#1F4E9C"],Roja:["#B3261E","#B3261E"],Kraft:["#B58A5C","#B58A5C"]};
+var CF={Blanca:"Blanco",Dorada:"Dorada",Negra:"Negro",Azul:"Azul",Roja:"Rojo",Kraft:"Kraft"};
 var P=[
-{n:"Bolsa Flow Pack",c:"Blanca,Dorada,Negra,Azul,Roja,Kraft",z:0,s:[["250 g",1000],["500 g",1200]]},
-{n:"Bolsa Doy Pack",c:"Blanca,Dorada,Negra,Kraft",z:1,s:[["250 g",1000],["500 g",1200]]},
-{n:"Bolsa 4PRO",c:"Blanca,Dorada,Negra,Azul,Roja",z:0,s:[["250 g",1100],["500 g",1500],["1000 g",1800]]}
+{n:"Bolsa Flow Pack",f:"Flow-Pack",c:"Blanca,Dorada,Negra,Azul,Roja,Kraft",z:0,s:[["250 g",1000],["500 g",1200]]},
+{n:"Bolsa Doy Pack",f:"Doy-Pack",c:"Blanca,Dorada,Negra,Kraft",z:1,s:[["250 g",1000],["500 g",1200]]},
+{n:"Bolsa 4PRO",f:"4PRO",c:"Blanca,Dorada,Negra,Azul,Roja",z:0,s:[["250 g",1100],["500 g",1500],["1000 g",1800]]}
 ];
 document.querySelectorAll(".card").forEach(function(card){
 var i=+card.dataset.i,d=P[i],k=card.querySelector(".cfg");
@@ -308,6 +310,10 @@ h+='</div></div><fieldset class="adds"><legend>Aditamento opcional</legend><labe
 if(d.z)h+='<small class="note" style="margin:-6px 0 12px">Zipper resellable incluido, ya instalado.</small>';
 h+='<label class="sel">Impresión<select class="pr"><option>Genérica (sin impresión)</option><option>Serigrafía (se cotiza)</option><option>Impresión digital (se cotiza)</option></select></label>';
 k.innerHTML=h;
+var th=card.querySelector(".thumb"),sv=th.querySelector("svg"),im=document.createElement("img");
+im.loading="lazy";im.decoding="async";im.hidden=true;th.appendChild(im);
+im.onload=function(){im.hidden=false;sv.style.display="none"};
+im.onerror=function(){im.hidden=true;sv.style.display=""};
 function upd(){
 var s=d.s[+card.querySelector(".pills input:checked").value],col=card.querySelector(".cols input:checked").value,pr=card.querySelector(".pr").value;
 var v=card.querySelector(".vl").checked,t=s[1]+(v?V:0);
@@ -320,7 +326,10 @@ card.querySelector(".pl2").textContent=v?"Tu selección":"Bolsa básica";
 card.querySelector("meta[itemprop=price]").setAttribute("content",t);
 card.querySelector("meta[itemprop=color]").setAttribute("content",col);
 card.querySelector("meta[itemprop=size]").setAttribute("content",s[0]);
-card.querySelector(".thumb").style.color=C[col][1];
+th.style.color=C[col][1];
+var src="imag/"+d.f+"-"+CF[col]+(v?"+valvula":"")+".webp";
+im.alt=d.n+" color "+col.toLowerCase()+(v?" con válvula desgasificadora":"");
+if(im.getAttribute("src")!==src){im.hidden=true;sv.style.display="";im.src=src}
 card.querySelector("[data-wa]").href=wa("Hola, quiero cotizar: "+d.n+" de "+s[0]+", color "+col.toLowerCase()+(v?", con válvula":", sin válvula")+(d.z?" (zipper incluido)":"")+". Impresión: "+pr.toLowerCase()+". Precio de referencia de la bolsa genérica: "+money(t)+" COP por unidad desde 100 bolsas. ¿Me ayudan con la cotización?");
 }
 card.querySelectorAll("input,select").forEach(function(x){x.addEventListener("change",upd)});
