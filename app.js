@@ -86,7 +86,7 @@ function upd() {
   var t = s[1] + (v ? V : 0);
   pp.querySelector(".pv").textContent = money(t);
   pp.querySelector(".pl2").textContent = v ? "Tu selección" : "Bolsa básica";
-  pp.querySelector(".stx").textContent = s[0] + " · " + col + (v ? " · con válvula" : " · sin válvula") + (d.z ? " · zipper incluido" : "");
+  pp.querySelector(".stx").textContent = s[0] + " · " + col + (v ? " · con válvula" : " · sin válvula");
   pp.querySelector("meta[itemprop=price]").setAttribute("content", t);
   pp.querySelector("meta[itemprop=color]").setAttribute("content", col);
   pp.querySelector("meta[itemprop=size]").setAttribute("content", s[0]);
