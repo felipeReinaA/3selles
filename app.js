@@ -81,7 +81,7 @@ function showEx(t, i) {
   im.hidden = true; hint.hidden = true;
   im.alt = "Ejemplo de bolsa con " + NM[t].toLowerCase() + " " + i;
   im.src = "imag/" + d.f + "-Ejemplo-" + SL[t] + "-" + i + ".webp";
-  tag.textContent = NM[t] + ": así podría quedar tu bolsa";
+  tag.textContent = NM[t];
   tag.hidden = false; plain.hidden = false;
   zb.classList.add("big");
   renderThumbs();
