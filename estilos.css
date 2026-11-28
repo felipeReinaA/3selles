@@ -194,3 +194,20 @@ dialog .x{position:absolute;top:-12px;right:-12px;width:38px;height:38px;border-
 .extag[hidden]{display:none}
 .zoom.big .thumb{height:380px}
 @media(min-width:860px){.zoom.big .thumb{height:540px}}
+/* galería v4: ficha + tu bolsa + ejemplos siempre visibles */
+.pdp .thumb{height:auto;aspect-ratio:3/4}
+.zoom.info{background:#fff}
+.vw{display:flex;gap:8px;margin-top:10px}
+.vw button{flex:1;padding:10px 12px;border:1px solid var(--l);border-radius:99px;background:#fff;color:var(--t);font:600 .85rem Inter,sans-serif;cursor:pointer;transition:all .3s ease}
+.vw button:hover{border-color:var(--g)}
+.vw button[aria-pressed=true]{background:var(--g);border-color:var(--g);color:#fff}
+.vw button[hidden]{display:none}
+.exs{margin-top:16px}
+.exh{font:700 .95rem 'Plus Jakarta Sans',sans-serif;color:var(--g);margin-bottom:2px}
+.exh span{display:block;font:400 .78rem Inter,sans-serif;color:var(--m)}
+.exg{margin-top:10px}
+.exk{font:700 .8rem Inter,sans-serif;color:var(--t);margin-bottom:6px}
+.thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;max-width:430px;overflow:visible;padding:0}
+.tb{width:auto;height:auto;aspect-ratio:4/5;flex:none}
+@media(min-width:860px){.pdp .gal{position:static}}
+@media(min-width:860px) and (min-height:940px){.pdp .gal{position:sticky}}
