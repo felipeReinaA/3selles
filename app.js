@@ -54,7 +54,7 @@ var hint = pp.querySelector(".hint");
 var gal = pp.querySelector(".gal");
 var NM = {d: "Impresión digital", s: "Serigrafía"}, SL = {d: "Digital", s: "Serigrafia"};
 var ex = d.ex || {d: 0, s: 0};
-var mode = "info", cur = null;
+var mode = "info";
 
 /* Selectores */
 var h = '<div class="fld"><b>Elige el tamaño</b><div class="pills" role="radiogroup" aria-label="Tamaño de la bolsa">';
@@ -77,56 +77,88 @@ vw.setAttribute("role", "group");
 vw.setAttribute("aria-label", "Vista de la imagen");
 vw.innerHTML = '<button type="button" data-v="info" aria-pressed="true">Ficha del producto</button><button type="button" data-v="bag" aria-pressed="false">Tu bolsa</button>';
 gal.appendChild(vw);
-var tag = document.createElement("span");
-tag.className = "extag";
-tag.hidden = true;
-zb.appendChild(tag);
 vw.addEventListener("click", function (e) {
   var b = e.target.closest("[data-v]");
   if (!b) return;
   mode = b.getAttribute("data-v");
-  cur = null;
   upd();
 });
 
-/* Ejemplos de personalización: todos visibles */
-var thumbs = null;
-if (ex.d || ex.s) {
+/* Visor de imágenes (ampliar y ejemplos con anterior / siguiente) */
+var dlg = document.getElementById("zm");
+var di = dlg.querySelector("img");
+var prev = document.createElement("button");
+var next = document.createElement("button");
+var cap = document.createElement("p");
+prev.type = next.type = "button";
+prev.className = "nv prev"; next.className = "nv next"; cap.className = "cap";
+prev.setAttribute("aria-label", "Ejemplo anterior"); next.setAttribute("aria-label", "Ejemplo siguiente");
+prev.textContent = "‹"; next.textContent = "›";
+dlg.appendChild(prev); dlg.appendChild(next); dlg.appendChild(cap);
+var list = [], idx = 0, single = true, sx = null;
+function showV(n) {
+  idx = (n + list.length) % list.length;
+  var e = list[idx];
+  di.src = e.src; di.alt = e.alt; cap.textContent = e.cap;
+}
+function openV(items, start) {
+  list = items;
+  single = items.length < 2;
+  dlg.classList.toggle("viewer", !single);
+  prev.hidden = next.hidden = cap.hidden = single;
+  showV(start);
+  if (!dlg.open) dlg.showModal();
+}
+prev.addEventListener("click", function (e) { e.stopPropagation(); showV(idx - 1); });
+next.addEventListener("click", function (e) { e.stopPropagation(); showV(idx + 1); });
+dlg.addEventListener("click", function (e) {
+  if (e.target === dlg || e.target.classList.contains("x") || (single && e.target === di)) dlg.close();
+});
+dlg.addEventListener("keydown", function (e) {
+  if (single) return;
+  if (e.key === "ArrowLeft") showV(idx - 1);
+  if (e.key === "ArrowRight") showV(idx + 1);
+});
+dlg.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, {passive: true});
+dlg.addEventListener("touchend", function (e) {
+  if (single || sx === null) return;
+  var dx = e.changedTouches[0].clientX - sx;
+  sx = null;
+  if (Math.abs(dx) > 45) showV(idx + (dx < 0 ? 1 : -1));
+}, {passive: true});
+zb.addEventListener("click", function () {
+  if (im.hidden || !im.getAttribute("src")) return;
+  openV([{src: im.src, alt: im.alt, cap: ""}], 0);
+});
+
+/* Ejemplos de personalización: todos visibles; al tocar se abre el visor */
+var all = [];
+["d", "s"].forEach(function (t) {
+  for (var i = 1; i <= ex[t]; i++) {
+    all.push({t: t, i: i, src: "imag/" + d.f + "-Ejemplo-" + SL[t] + "-" + i + ".webp", alt: "Ejemplo de bolsa con " + NM[t].toLowerCase() + " " + i, cap: NM[t] + " · ejemplo " + i + " de " + ex[t]});
+  }
+});
+if (all.length) {
   var box = document.createElement("div");
   box.className = "exs";
   var eh = '<p class="exh">Ejemplos de personalización <span>Toca uno para verlo grande</span></p>';
   ["d", "s"].forEach(function (t) {
     if (!ex[t]) return;
     eh += '<div class="exg"><p class="exk">' + (t === "d" ? "Impresión digital" : "Serigrafía · 1 o 2 tintas") + '</p><div class="thumbs">';
-    for (var i = 1; i <= ex[t]; i++) {
-      var full = "imag/" + d.f + "-Ejemplo-" + SL[t] + "-" + i + ".webp";
-      eh += '<button type="button" class="tb" data-t="' + t + '" data-i="' + i + '" aria-pressed="false" aria-label="Ver ejemplo de ' + NM[t].toLowerCase() + " " + i + '"><img src="' + full.replace(".webp", "_mini.webp") + '" alt="" width="160" height="200" loading="lazy" onerror="this.onerror=null;this.src=\'' + full + "'\"></button>";
-    }
+    all.forEach(function (e, n) {
+      if (e.t !== t) return;
+      eh += '<button type="button" class="tb" data-n="' + n + '" aria-label="Ver ejemplo de ' + NM[t].toLowerCase() + " " + e.i + '"><img src="' + e.src.replace(".webp", "_mini.webp") + '" alt="" width="160" height="200" loading="lazy" onerror="this.onerror=null;this.src=\'' + e.src + "'\"></button>";
+    });
     eh += "</div></div>";
   });
   eh += '<p class="exn">Imágenes de referencia. El resultado final depende de tu diseño.</p>';
   box.innerHTML = eh;
   gal.appendChild(box);
-  thumbs = box;
   box.addEventListener("click", function (e) {
     var b = e.target.closest(".tb");
-    if (!b) return;
-    mode = "ex";
-    cur = {t: b.getAttribute("data-t"), i: +b.getAttribute("data-i")};
-    upd();
+    if (b) openV(all, +b.getAttribute("data-n"));
   });
 }
-
-/* Ampliar imagen */
-var dlg = document.getElementById("zm");
-var di = dlg.querySelector("img");
-zb.addEventListener("click", function () {
-  if (im.hidden || !im.getAttribute("src")) return;
-  di.src = im.src;
-  di.alt = im.alt;
-  dlg.showModal();
-});
-dlg.addEventListener("click", function () { dlg.close(); });
 
 im.addEventListener("load", function () { im.hidden = false; sv.style.display = "none"; hint.hidden = false; });
 im.addEventListener("error", function () {
@@ -153,10 +185,7 @@ function upd() {
   th.style.color = C[col][1];
 
   var src, alt;
-  if (mode === "ex" && cur) {
-    src = "imag/" + d.f + "-Ejemplo-" + SL[cur.t] + "-" + cur.i + ".webp";
-    alt = "Ejemplo de bolsa con " + NM[cur.t].toLowerCase() + " " + cur.i;
-  } else if (mode === "info") {
+  if (mode === "info") {
     src = "imag/" + d.f + "-Ficha.webp";
     alt = "Ficha del producto: " + d.n + ", características y colores disponibles";
   } else {
@@ -164,22 +193,17 @@ function upd() {
     alt = d.n + " color " + col.toLowerCase() + (v ? " con válvula desgasificadora" : "");
   }
   zb.classList.toggle("info", mode === "info");
-  tag.hidden = !(mode === "ex" && cur);
-  if (mode === "ex" && cur) tag.textContent = NM[cur.t];
   vw.querySelectorAll("[data-v]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-v") === mode ? "true" : "false"); });
-  if (thumbs) thumbs.querySelectorAll(".tb").forEach(function (b) {
-    b.setAttribute("aria-pressed", cur && mode === "ex" && b.getAttribute("data-t") === cur.t && +b.getAttribute("data-i") === cur.i ? "true" : "false");
-  });
   im.alt = alt;
   if (im.getAttribute("src") !== src) { im.hidden = true; sv.style.display = ""; hint.hidden = true; im.src = src; }
 
-  pp.querySelector("[data-wa]").href = wa("Hola, quiero cotizar: " + d.n + " de " + s[0] + ", color " + col.toLowerCase() + (v ? ", con válvula" : ", sin válvula") + (d.z ? " (zipper incluido)" : "") + ". Impresión: " + pr.toLowerCase() + ". Precio de referencia de la bolsa genérica: " + money(t) + " COP por unidad desde 100 bolsas." + (mode === "ex" && cur ? " Me gustó el ejemplo " + cur.i + " de " + NM[cur.t].toLowerCase() + "." : "") + " ¿Me ayudan con la cotización?");
+  pp.querySelector("[data-wa]").href = wa("Hola, quiero cotizar: " + d.n + " de " + s[0] + ", color " + col.toLowerCase() + (v ? ", con válvula" : ", sin válvula") + (d.z ? " (zipper incluido)" : "") + ". Impresión: " + pr.toLowerCase() + ". Precio de referencia de la bolsa genérica: " + money(t) + " COP por unidad desde 100 bolsas. ¿Me ayudan con la cotización?");
 }
 
 /* El tamaño no cambia la foto; el color y la válvula sí */
 k.querySelectorAll('input[name="s"]').forEach(function (x) { x.addEventListener("change", upd); });
 k.querySelectorAll('input[name="c"], .vl').forEach(function (x) {
-  x.addEventListener("change", function () { mode = "bag"; cur = null; upd(); });
+  x.addEventListener("change", function () { mode = "bag"; upd(); });
 });
 k.querySelector(".pr").addEventListener("change", upd);
 upd();
