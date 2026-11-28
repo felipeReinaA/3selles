@@ -13,7 +13,7 @@ var C = {
 var P = {
   flow: {n: "Bolsa Flow Pack", f: "Flow-Pack", c: "Blanca,Dorada,Negra,Azul,Roja,Kraft", z: 0, ex: {d: 0, s: 0}, s: [["250 g", 1000], ["500 g", 1200]]},
   doy: {n: "Bolsa Doy Pack", f: "Doy-Pack", c: "Blanca,Dorada,Negra,Kraft", z: 1, ex: {d: 5, s: 5}, s: [["250 g", 1000], ["500 g", 1200]]},
-  "4pro": {n: "Bolsa 4PRO", f: "4PRO", c: "Blanca,Dorada,Negra,Azul,Roja", z: 0, ex: {d: 0, s: 0}, s: [["250 g", 1100], ["500 g", 1500], ["1000 g", 1800]]}
+  "4pro": {n: "Bolsa 4PRO", f: "4PRO", c: "Blanca,Dorada,Negra,Azul,Roja", z: 0, ex: {d: 5, s: 5}, s: [["250 g", 1100], ["500 g", 1500], ["1000 g", 1800]]}
 };
 function wa(m) { return "https://wa.me/" + PHONE + "?text=" + encodeURIComponent(m); }
 function money(n) { return "$" + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
